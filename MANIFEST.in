@@ -1,0 +1,4 @@
+graft ssecretss/static
+graft ssecretss/templates
+include ssecretss/schema.sql
+
