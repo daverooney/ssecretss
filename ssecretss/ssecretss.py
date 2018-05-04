@@ -86,7 +86,7 @@ def initsqlite_command():
 def expire_secrets():
     db = get_db()
     now = dt.datetime.now().isoformat()
-    timeexp_querytxt = 'DELETE * FROM secrets WHERE expire_at > datetime(?);'
+    timeexp_querytxt = 'DELETE * FROM secrets WHERE expire_at < datetime(?);'
     viewexp_querytxt = 'DELETE * FROM secrets WHERE views_left <= 0;'
     c = db.cursor()
     c.execute(timeexp_querytxt, now)
@@ -105,7 +105,7 @@ def read_nothing():
 @app.route('/w/', methods=["GET", "POST"])
 def write_secret():
     if request.method == "GET":
-        pass
+        return render_template("main_page.html")
     elif request.method == "POST":
         db = get_db()
         secret_guid = uuid.uuid3(uuid.uuid1(),"ssecretss").get_hex()
@@ -133,17 +133,32 @@ def write_secret():
     else:
         abort(405)      # HTTP error code for invalid/disallowed method
 
-@app.route('/r/<secretid>')
+@app.route('/r/<uuid:secretid>')
 def read_secret(secretid):
     db = get_db()
-    cur = db.execute("select * from secrets where secret_guid = ?", secretid)
-    sec = cur.fetchone()
-    dbid, guid, sectext, expire_at, views = sec
-    return render_template('main_page.html', secret=sec)
+    c = db.cursor()
+    c.execute("SELECT * FROM secrets WHERE secret_guid = ?;", secretid)
+    sec = c.fetchone()
+        # For easy reference, the schema is:
+        #   drop table if exists secrets;
+        #   create table secrets (
+        #      id integer primary key autoincrement,
+        #      secret_guid text not null,
+        #      secret_text text not null,
+        #      expire_at text not null,
+        #      views_left int not null
+        #   );
+    dbid, secret_guid, secret_text, expire_at, views_left = sec
+    views_left -= 1
+    if views_left <= 0:
+        c.execute("DELETE FROM secrets WHERE secret_guid = ?;", secret_guid)
+        db.commit()
+    c.close()
+    return render_template('secret_display_page.html', secret=secret_text, expire=expire_at, views=views_left)
 
 @app.route('/about')
 def about():
-    pass
+    return render_template("about_page.html") 
 
 
 if __name__ == "__main__":

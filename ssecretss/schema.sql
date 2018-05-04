@@ -6,3 +6,5 @@ create table secrets (
     expire_at text not null,
     views_left int not null
 );
+-- create unique index guid_index on secrets (secret_guid);
+-- create index expiration_index on secrets (expire_at);
