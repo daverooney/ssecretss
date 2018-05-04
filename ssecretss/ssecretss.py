@@ -19,7 +19,7 @@ app.config.from_object(__name__)
 if os.path.exists(os.path.join(app.instance_path, "config.py")):
     app.config.from_file(os.path.join(app.instance_path, "config.py"))
 
-if backend == 'sqlite':
+if backend == 'sqlite':         # maybe move this to config.py once other backends exist
     app.config.update(dict(
         BACKEND='sqlite',
         DATABASE=os.path.join(app.instance_path, 'sssecretss.db'),
@@ -82,6 +82,18 @@ def initsqlite_command():
     init_db()
     print("Initialized SQLite database.")
 
+@app.cli.command('expirepass')
+def expire_secrets():
+    db = get_db()
+    now = dt.datetime.now().isoformat()
+    timeexp_querytxt = 'DELETE * FROM secrets WHERE expire_at > datetime(?);'
+    viewexp_querytxt = 'DELETE * FROM secrets WHERE views_left <= 0;'
+    c = db.cursor()
+    c.execute(timeexp_querytxt, now)
+    c.execute(viewexp_querytxt)
+    db.commit()
+    c.close()
+
 @app.route('/', methods=["GET", "POST"])
 def hello():
     return redirect(url_for('write_secret'))
@@ -99,8 +111,8 @@ def write_secret():
         secret_guid = uuid.uuid3(uuid.uuid1(),"ssecretss").get_hex()
         now = dt.datetime.now()
         secret_text = request.form["secret_text"]
-        expire_after = request.form["expire_after"]
-        views_allowed = request.form("views_allowed"]
+        expire_after = int(request.form["expire_after"])
+        views_allowed = int(request.form["views_allowed"])
         # validation passes
         if len(secret_text) > 1024;
             flash("Secret message is too long! Nope!")
