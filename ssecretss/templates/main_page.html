@@ -1,35 +1,39 @@
+<!DOCTYPE html>
 <html>
     <head>
+        {% block head %}
         <title>sSecretss!</title>
         <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" integrity="sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" crossorigin="anonymous">
+        <link rel="stylesheet" href="{{ url_for("static", filename="style.css") }}">
+        {% end block %}
     </head>
-
     <body>
-        <nav class="navbar navbar-inverse">
-            <div class="container">
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                        <span class="sr-only">Toggle navigation</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                    <a class="navbar-brand" href="#">sSecretss!</a>
-                </div>
-            </div>
+        <nav class="navbar">
+            {% block navblock %}
+                <div class="container">
+                    <div class="navbar-header">
+                        <a class="navbar-brand" href="/w/">sSecretss!</a>
+                    </div>
+                </div> <!-- end container -->
+            {% end block %}
         </nav>
-        <div class="container">
-            <div class="row">
-                Info goes here! Also maybe explaining.
-            </div>
-            <div class="row">
-                <form action="." method="POST">
-                    <textarea name=secretstring placeholder="Enter your secret here! (up to 1k of text)" class="form-control"></textarea>
-                    <input type="submit" class="btn btn-success" value="Post secret">
-                </form>
-            </div>
+        {% block flash %}
+            {% for message in get_flashed_messages() %}
+                <div class="flash">{{ message }}</div>
+            {% endfor %}
+        {% end block %}
+        <div class="container" id="content">
+            {% block content %}
+                <div class="row">
+                    Info goes here! Also maybe explaining.
+                </div>
+            {% end block %}
+        </div><!-- /.container -->
+        <div class="container" id="footer">
+            {% block footer %}
+                <h5> sSecretss is the Simple Secret Sharing Server, powered by Python </h5>
+                Copyleft &copy; 2018 as soon as I figure out how to do fancy copyleft things.
+            {% end block %}
         </div><!-- /.container -->
     </body>
 </html>
