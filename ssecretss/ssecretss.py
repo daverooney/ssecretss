@@ -12,7 +12,7 @@ import sqlite3 as sql
 import datetime as dt
 import os, uuid
 
-backend = 'sqlite'      # other backends to come, starting with dynamodb
+backend = 'sqlite'      # other backends to come, starting with DynamoDB and SQLAlchemy
 
 app = Flask(__name__)
 app.config.from_object(__name__)
